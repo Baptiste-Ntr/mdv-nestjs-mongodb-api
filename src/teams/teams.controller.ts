@@ -14,41 +14,42 @@ export class TeamsController {
     @Post()
     async create(@Body() createTeamDto: any): Promise<Team> {
 
+        // Vérification des paramètres de la requête.
         if (!createTeamDto.name || !createTeamDto.base || !createTeamDto.championshipsWon) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Missing parameters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des types des paramètres de la requête.
         if (typeof createTeamDto.name !== 'string' || typeof createTeamDto.base !== 'string' || typeof createTeamDto.championshipsWon !== 'number') {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Wrong type of parameters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des valeurs des paramètres de la requête.
         if (createTeamDto.championshipsWon < 0) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Championships won must be a positive number',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des longueurs des paramètres de la requête.
         if (createTeamDto.name.length < 3 || createTeamDto.name.length > 20) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Name must be between 3 and 20 characters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des longueurs des paramètres de la requête.
         if (createTeamDto.base.length < 3 || createTeamDto.base.length > 20) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Base must be between 3 and 20 characters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des valeurs des paramètres de la requête.
         if (createTeamDto.name === createTeamDto.base) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
@@ -56,14 +57,14 @@ export class TeamsController {
             }, HttpStatus.BAD_REQUEST)
         }
 
-        if (this.teamsService.findOne(createTeamDto.name)) {
-            throw new HttpException({
-                status: HttpStatus.BAD_REQUEST,
-                error: 'This team already exists',
-            }, HttpStatus.BAD_REQUEST)
-        }
-
         try {
+            const isNewTeamExist = await this.teamsService.findOne(createTeamDto.name)
+            if (isNewTeamExist) {
+                throw new HttpException({
+                    status: HttpStatus.BAD_REQUEST,
+                    error: 'This team already exists',
+                }, HttpStatus.BAD_REQUEST)
+            }
             const newTeam = await this.teamsService.create(createTeamDto)
             console.log(`${createTeamDto.name} team created`)
             return newTeam
@@ -94,21 +95,21 @@ export class TeamsController {
     // Le décorateur @Param('id') extrait le paramètre 'id' de l'URL et le passe à la méthode findOne() du service.
     @Get(':id')
     async findOne(@Param('id') id: string): Promise<Team> {
-
+        // Vérification des paramètres de la requête.
         if (!id) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Missing parameter',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des types des paramètres de la requête.
         if (typeof id !== 'string') {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Wrong type of parameter',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des longueurs des paramètres de la requête.
         if (id.length < 3 || id.length > 20) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
@@ -118,6 +119,12 @@ export class TeamsController {
 
         try {
             const team = await this.teamsService.findOne(id)
+            if (!team) {
+                throw new HttpException({
+                    status: HttpStatus.NOT_FOUND,
+                    error: 'Team not found',
+                }, HttpStatus.NOT_FOUND)
+            }
             console.log(`${id} team retrieved`)
             return team
         } catch (err) {
@@ -132,42 +139,42 @@ export class TeamsController {
     // Le décorateur @Body() extrait les données du corps de la requête et les passe à la méthode update() du service.
     @Put(':id')
     async update(@Param('id') id: string, @Body() updateTeamDto: any): Promise<Team> {
-
+        // Vérification des paramètres de la requête.
         if (!id || !updateTeamDto.name || !updateTeamDto.base || !updateTeamDto.championshipsWon) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Missing parameters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des types des paramètres de la requête.
         if (typeof id !== 'string' || typeof updateTeamDto.name !== 'string' || typeof updateTeamDto.base !== 'string' || typeof updateTeamDto.championshipsWon !== 'number') {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Wrong type of parameters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des longueurs des paramètres de la requête.
         if (updateTeamDto.championshipsWon < 0) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Championships won must be a positive number',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des longueurs des paramètres de la requête.
         if (updateTeamDto.name.length < 3 || updateTeamDto.name.length > 20) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Name must be between 3 and 20 characters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des longueurs des paramètres de la requête.
         if (updateTeamDto.base.length < 3 || updateTeamDto.base.length > 20) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Base must be between 3 and 20 characters',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des valeurs des paramètres de la requête.
         if (updateTeamDto.name === updateTeamDto.base) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
@@ -175,14 +182,14 @@ export class TeamsController {
             }, HttpStatus.BAD_REQUEST)
         }
 
-        if (this.teamsService.findOne(updateTeamDto.name)) {
-            throw new HttpException({
-                status: HttpStatus.BAD_REQUEST,
-                error: 'This team already exists',
-            }, HttpStatus.BAD_REQUEST)
-        }
-
         try {
+            const isUpdatedNameExist = await this.teamsService.findOne(updateTeamDto.name)
+            if (isUpdatedNameExist) {
+                throw new HttpException({
+                    status: HttpStatus.BAD_REQUEST,
+                    error: 'This team already exists',
+                }, HttpStatus.BAD_REQUEST)
+            }
             const updatedTeam = await this.teamsService.update(id, updateTeamDto)
             console.log(`${id} team updated`)
             return updatedTeam
@@ -197,21 +204,21 @@ export class TeamsController {
     // Le décorateur @Delete(':id') crée une route DELETE pour '/teams/:id'.
     @Delete(':id')
     async delete(@Param('id') id: string): Promise<Team> {
-
+        // Vérification des paramètres de la requête.
         if (!id) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Missing parameter',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des types des paramètres de la requête.
         if (typeof id !== 'string') {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'Wrong type of parameter',
             }, HttpStatus.BAD_REQUEST)
         }
-
+        // Vérification des longueurs des paramètres de la requête.
         if (id.length < 3 || id.length > 20) {
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
@@ -219,14 +226,14 @@ export class TeamsController {
             }, HttpStatus.BAD_REQUEST)
         }
 
-        if (!this.teamsService.findOne(id)) {
-            throw new HttpException({
-                status: HttpStatus.NOT_FOUND,
-                error: 'This team does not exist',
-            }, HttpStatus.NOT_FOUND)
-        }
-
         try {
+            const isDeletedTeamExist = await this.teamsService.findOne(id)
+            if (!isDeletedTeamExist) {
+                throw new HttpException({
+                    status: HttpStatus.NOT_FOUND,
+                    error: 'Team not found',
+                }, HttpStatus.NOT_FOUND)
+            }
             const deletedTeam = await this.teamsService.delete(id)
             console.log(`${id} team deleted`)
             return deletedTeam
